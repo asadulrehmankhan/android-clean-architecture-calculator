@@ -13,6 +13,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -28,6 +30,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.aloussase.calculator.ui.AboutScreen
 import io.github.aloussase.calculator.ui.CalculatorScreen
 import io.github.aloussase.calculator.ui.CalculatorViewModel
 import io.github.aloussase.calculator.ui.HistoryScreen
@@ -45,11 +48,13 @@ class MainActivity : ComponentActivity() {
 
                 var showOptionsMenu by remember { mutableStateOf(false) }
                 val navController = rememberNavController()
+                val snackbarHostState = remember { SnackbarHostState() }
 
                 Scaffold(
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
                     topBar = {
                         TopAppBar(
-                            title = { Text(text = "Calculator") },
+                            title = {},
                             actions = {
                                 IconButton(onClick = { showOptionsMenu = true }) {
                                     Icon(
@@ -86,7 +91,9 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             composable(Screen.About) {
-                                Text(text = "About")
+                                AboutScreen(
+                                    modifier = Modifier.padding(innerPadding)
+                                )
                             }
                             composable(Screen.History) { backStackEntry ->
                                 val parentEntry = remember(backStackEntry) {
@@ -95,6 +102,8 @@ class MainActivity : ComponentActivity() {
                                 val viewModel = hiltViewModel<CalculatorViewModel>(parentEntry)
                                 HistoryScreen(
                                     viewModel,
+                                    navController,
+                                    snackbarHostState,
                                     modifier = Modifier.padding(innerPadding)
                                 )
                             }

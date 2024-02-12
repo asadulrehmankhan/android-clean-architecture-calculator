@@ -18,6 +18,10 @@ class CalculatorRepository(
         historyDatabase.historyItemDao().insertOne(item)
     }
 
+    suspend fun deleteAllHistoryItems() {
+        historyDatabase.historyItemDao().clear()
+    }
+
     suspend fun calculate(expr: String): Int {
         Log.d("CalculatorRepository", "Calculating expression: $expr")
 

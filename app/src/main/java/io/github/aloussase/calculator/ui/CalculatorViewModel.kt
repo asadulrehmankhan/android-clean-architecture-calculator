@@ -7,6 +7,8 @@ import io.github.aloussase.calculator.data.HistoryItem
 import io.github.aloussase.calculator.repository.CalculatorRepository
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnClear
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnComputeResult
+import io.github.aloussase.calculator.ui.CalculatorEvent.OnHistoryClear
+import io.github.aloussase.calculator.ui.CalculatorEvent.OnHistoryItemClicked
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnInput
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnOperation
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,6 +64,26 @@ class CalculatorViewModel @Inject constructor(
                         it.copy(
                             result = result,
                             history = it.history + item
+                        )
+                    }
+                }
+            }
+
+            is OnHistoryItemClicked -> {
+                _state.update {
+                    it.copy(
+                        input = evt.item,
+                        result = 0,
+                    )
+                }
+            }
+
+            is OnHistoryClear -> {
+                viewModelScope.launch {
+                    repository.deleteAllHistoryItems()
+                    _state.update {
+                        it.copy(
+                            history = emptyList()
                         )
                     }
                 }
