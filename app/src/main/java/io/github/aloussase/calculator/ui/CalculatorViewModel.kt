@@ -7,6 +7,7 @@ import io.github.aloussase.calculator.data.HistoryItem
 import io.github.aloussase.calculator.repository.CalculatorRepository
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnClear
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnComputeResult
+import io.github.aloussase.calculator.ui.CalculatorEvent.OnDeleteHistoryItem
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnHistoryClear
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnHistoryItemClicked
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnInput
@@ -59,11 +60,11 @@ class CalculatorViewModel @Inject constructor(
                 viewModelScope.launch {
                     val result = repository.calculate(_state.value.input)
                     val item = HistoryItem(content = _state.value.input)
-                    repository.createHistoryItem(item)
+                    val id = repository.createHistoryItem(item)
                     _state.update {
                         it.copy(
                             result = result,
-                            history = it.history + item
+                            history = it.history + item.copy(id = id)
                         )
                     }
                 }
@@ -84,6 +85,19 @@ class CalculatorViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             history = emptyList()
+                        )
+                    }
+                }
+            }
+
+            is OnDeleteHistoryItem -> {
+                viewModelScope.launch {
+                    repository.deleteOneItem(evt.itemId)
+                    _state.update { it ->
+                        it.copy(
+                            history = it.history.filter { item ->
+                                item.id != evt.itemId
+                            }
                         )
                     }
                 }

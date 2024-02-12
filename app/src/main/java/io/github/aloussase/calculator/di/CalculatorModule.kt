@@ -26,7 +26,9 @@ object CalculatorModule {
             application.applicationContext,
             HistoryDatabase::class.java,
             "calculator.db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides

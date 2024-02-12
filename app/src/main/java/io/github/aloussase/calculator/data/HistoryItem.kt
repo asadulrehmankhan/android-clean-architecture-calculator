@@ -8,5 +8,5 @@ import androidx.room.PrimaryKey
 )
 data class HistoryItem(
     val content: String,
-    @PrimaryKey val id: Int? = null,
+    @PrimaryKey val id: Long? = null,
 )

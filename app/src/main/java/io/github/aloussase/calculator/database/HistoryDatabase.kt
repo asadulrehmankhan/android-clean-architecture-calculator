@@ -6,7 +6,7 @@ import io.github.aloussase.calculator.data.HistoryItem
 
 @Database(
     entities = [HistoryItem::class],
-    version = 1
+    version = 2
 )
 abstract class HistoryDatabase : RoomDatabase() {
     abstract fun historyItemDao(): HistoryItemDao

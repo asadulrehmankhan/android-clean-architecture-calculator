@@ -6,6 +6,6 @@ sealed class CalculatorEvent {
     data object OnComputeResult : CalculatorEvent()
     data object OnClear : CalculatorEvent()
     data class OnHistoryItemClicked(val item: String) : CalculatorEvent()
-
     data object OnHistoryClear : CalculatorEvent()
+    data class OnDeleteHistoryItem(val itemId: Long) : CalculatorEvent()
 }

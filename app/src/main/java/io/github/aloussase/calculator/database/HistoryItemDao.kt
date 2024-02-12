@@ -14,5 +14,8 @@ interface HistoryItemDao {
     suspend fun clear()
 
     @Insert
-    suspend fun insertOne(item: HistoryItem)
+    suspend fun insertOne(item: HistoryItem): Long
+
+    @Query("DELETE from history_items WHERE id = :itemId")
+    suspend fun delete(itemId: Long)
 }

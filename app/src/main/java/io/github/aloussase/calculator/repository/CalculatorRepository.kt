@@ -14,12 +14,16 @@ class CalculatorRepository(
         return historyDatabase.historyItemDao().findAll()
     }
 
-    suspend fun createHistoryItem(item: HistoryItem) {
-        historyDatabase.historyItemDao().insertOne(item)
+    suspend fun createHistoryItem(item: HistoryItem): Long {
+        return historyDatabase.historyItemDao().insertOne(item)
     }
 
     suspend fun deleteAllHistoryItems() {
         historyDatabase.historyItemDao().clear()
+    }
+
+    suspend fun deleteOneItem(itemId: Long) {
+        historyDatabase.historyItemDao().delete(itemId)
     }
 
     suspend fun calculate(expr: String): Int {
