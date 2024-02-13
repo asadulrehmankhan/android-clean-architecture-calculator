@@ -9,6 +9,7 @@ import dagger.hilt.components.SingletonComponent
 import io.github.aloussase.calculator.api.MathApi
 import io.github.aloussase.calculator.database.HistoryDatabase
 import io.github.aloussase.calculator.repository.CalculatorRepository
+import io.github.aloussase.calculator.repository.ICalculatorRepository
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import javax.inject.Singleton
@@ -46,7 +47,7 @@ object CalculatorModule {
     fun provideCalculatorRepository(
         mathApi: MathApi,
         historyDatabase: HistoryDatabase
-    ): CalculatorRepository {
+    ): ICalculatorRepository {
         return CalculatorRepository(mathApi, historyDatabase)
     }
 

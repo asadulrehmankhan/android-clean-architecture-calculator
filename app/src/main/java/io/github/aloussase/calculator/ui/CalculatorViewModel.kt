@@ -4,8 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aloussase.calculator.data.HistoryItem
-import io.github.aloussase.calculator.repository.CalculatorRepository
+import io.github.aloussase.calculator.repository.ICalculatorRepository
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnClear
+import io.github.aloussase.calculator.ui.CalculatorEvent.OnClearError
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnComputeResult
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnDeleteHistoryItem
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnHistoryClear
@@ -21,7 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CalculatorViewModel @Inject constructor(
-    private val repository: CalculatorRepository
+    private val repository: ICalculatorRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CalculatorState())
@@ -62,10 +63,16 @@ class CalculatorViewModel @Inject constructor(
                     val item = HistoryItem(content = _state.value.input)
                     val id = repository.createHistoryItem(item)
                     _state.update {
-                        it.copy(
-                            result = result,
-                            history = it.history + item.copy(id = id)
-                        )
+                        if (result == null) {
+                            it.copy(
+                                hadError = true
+                            )
+                        } else {
+                            it.copy(
+                                result = result,
+                                history = it.history + item.copy(id = id)
+                            )
+                        }
                     }
                 }
             }
@@ -74,7 +81,7 @@ class CalculatorViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         input = evt.item,
-                        result = 0,
+                        result = 0f,
                     )
                 }
             }
@@ -93,7 +100,7 @@ class CalculatorViewModel @Inject constructor(
             is OnDeleteHistoryItem -> {
                 viewModelScope.launch {
                     repository.deleteOneItem(evt.itemId)
-                    _state.update { it ->
+                    _state.update {
                         it.copy(
                             history = it.history.filter { item ->
                                 item.id != evt.itemId
@@ -107,7 +114,15 @@ class CalculatorViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         input = "",
-                        result = 0
+                        result = 0f
+                    )
+                }
+            }
+
+            is OnClearError -> {
+                _state.update {
+                    it.copy(
+                        hadError = false
                     )
                 }
             }

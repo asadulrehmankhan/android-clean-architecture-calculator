@@ -9,24 +9,24 @@ import io.github.aloussase.calculator.database.HistoryDatabase
 class CalculatorRepository(
     val mathApi: MathApi,
     val historyDatabase: HistoryDatabase
-) {
-    suspend fun getAllHistoryItems(): List<HistoryItem> {
+) : ICalculatorRepository {
+    override suspend fun getAllHistoryItems(): List<HistoryItem> {
         return historyDatabase.historyItemDao().findAll()
     }
 
-    suspend fun createHistoryItem(item: HistoryItem): Long {
+    override suspend fun createHistoryItem(item: HistoryItem): Long {
         return historyDatabase.historyItemDao().insertOne(item)
     }
 
-    suspend fun deleteAllHistoryItems() {
+    override suspend fun deleteAllHistoryItems() {
         historyDatabase.historyItemDao().clear()
     }
 
-    suspend fun deleteOneItem(itemId: Long) {
+    override suspend fun deleteOneItem(itemId: Long) {
         historyDatabase.historyItemDao().delete(itemId)
     }
 
-    suspend fun calculate(expr: String): Int {
+    override suspend fun calculate(expr: String): Float? {
         Log.d("CalculatorRepository", "Calculating expression: $expr")
 
         val result = mathApi.calculateExpr(
@@ -36,10 +36,9 @@ class CalculatorRepository(
         )
 
         if (result.error != null) {
-            Log.d("CalculatorRepository", "Failed to get result: ${result.error}")
-            return -1
+            return null
         }
 
-        return result.result?.toInt()!!
+        return result.result?.toFloatOrNull()
     }
 }

@@ -8,4 +8,5 @@ sealed class CalculatorEvent {
     data class OnHistoryItemClicked(val item: String) : CalculatorEvent()
     data object OnHistoryClear : CalculatorEvent()
     data class OnDeleteHistoryItem(val itemId: Long) : CalculatorEvent()
+    data object OnClearError : CalculatorEvent()
 }

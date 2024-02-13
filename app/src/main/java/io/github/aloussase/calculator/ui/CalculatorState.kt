@@ -4,6 +4,7 @@ import io.github.aloussase.calculator.data.HistoryItem
 
 data class CalculatorState(
     val input: String = "",
-    val result: Int = 0,
-    val history: List<HistoryItem> = emptyList()
+    val result: Float = 0f,
+    val history: List<HistoryItem> = emptyList(),
+    val hadError: Boolean = false
 )

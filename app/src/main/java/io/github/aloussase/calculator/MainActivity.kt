@@ -24,6 +24,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -80,13 +82,11 @@ class MainActivity : ComponentActivity() {
                             startDestination = Screen.Calculator,
                             route = Screen.CalculatorRoutes
                         ) {
-                            composable(Screen.Calculator) { backStackEntry ->
-                                val parentEntry = remember(backStackEntry) {
-                                    navController.getBackStackEntry(Screen.CalculatorRoutes)
-                                }
-                                val viewModel = hiltViewModel<CalculatorViewModel>(parentEntry)
+                            composable(Screen.Calculator) { entry ->
+                                val viewModel = entry.viewModel<CalculatorViewModel>(navController)
                                 CalculatorScreen(
                                     viewModel,
+                                    snackbarHostState,
                                     modifier = Modifier.padding(innerPadding)
                                 )
                             }
@@ -95,11 +95,8 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier.padding(innerPadding)
                                 )
                             }
-                            composable(Screen.History) { backStackEntry ->
-                                val parentEntry = remember(backStackEntry) {
-                                    navController.getBackStackEntry(Screen.CalculatorRoutes)
-                                }
-                                val viewModel = hiltViewModel<CalculatorViewModel>(parentEntry)
+                            composable(Screen.History) { entry ->
+                                val viewModel = entry.viewModel<CalculatorViewModel>(navController)
                                 HistoryScreen(
                                     viewModel,
                                     navController,
@@ -113,6 +110,14 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+
+@Composable
+inline fun <reified T : ViewModel> NavBackStackEntry.viewModel(navController: NavController): T {
+    val navGraphRoute = destination.parent?.route ?: return hiltViewModel()
+    val parentEntry = remember(this) { navController.getBackStackEntry(navGraphRoute) }
+    val viewModel = hiltViewModel<T>(parentEntry)
+    return viewModel
 }
 
 @Composable

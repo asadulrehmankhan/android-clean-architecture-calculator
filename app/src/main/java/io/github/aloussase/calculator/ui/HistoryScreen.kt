@@ -1,8 +1,10 @@
 package io.github.aloussase.calculator.ui
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,17 +27,41 @@ import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import io.github.aloussase.calculator.repository.NullCalculatorRepository
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnDeleteHistoryItem
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnHistoryClear
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnHistoryItemClicked
+import io.github.aloussase.calculator.ui.theme.CalculatorTheme
 import kotlinx.coroutines.launch
+
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun HistoryScreenPreview() {
+    val navController = rememberNavController()
+    val snackbar = remember { SnackbarHostState() }
+    val viewModel = CalculatorViewModel(NullCalculatorRepository())
+
+    CalculatorTheme {
+        HistoryScreen(
+            viewModel,
+            navController,
+            snackbar
+        )
+    }
+}
+
 
 @Composable
 fun HistoryScreen(
@@ -51,12 +77,12 @@ fun HistoryScreen(
         modifier = modifier,
         color = MaterialTheme.colorScheme.background
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        Box {
             if (state.history.isNotEmpty()) {
                 FloatingActionButton(
                     shape = RoundedCornerShape(50),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.background,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(16.dp),
@@ -74,38 +100,52 @@ fun HistoryScreen(
                 }
             }
 
-            LazyColumn(
-                horizontalAlignment = Alignment.End,
+            Column(
+                modifier = Modifier.fillMaxSize()
             ) {
-                items(
-                    items = state.history,
-                    key = { it.id!! }
-                ) { item ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                viewModel.onEvent(OnHistoryItemClicked(item.content))
-                                navController.navigate(Screen.Calculator)
-                            },
-                    ) {
-                        SwipeToDeleteItem(
-                            item,
-                            onDelete = {
-                                viewModel.onEvent(OnDeleteHistoryItem(it.id!!))
-                                scope.launch {
-                                    snackbar.showSnackbar("Item deleted from history")
-                                }
-                            }
+                Text(
+                    text = "History",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                )
+
+                LazyColumn(
+                    horizontalAlignment = Alignment.End,
+                ) {
+                    items(
+                        items = state.history,
+                        key = { it.id!! }
+                    ) { item ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.onEvent(OnHistoryItemClicked(item.content))
+                                    navController.navigate(Screen.Calculator)
+                                },
                         ) {
-                            Text(
-                                text = it.content,
-                                textAlign = TextAlign.End,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.background)
-                                    .padding(16.dp),
-                            )
+                            SwipeToDeleteItem(
+                                item,
+                                onDelete = {
+                                    viewModel.onEvent(OnDeleteHistoryItem(it.id!!))
+                                    scope.launch {
+                                        snackbar.showSnackbar("Item deleted from history")
+                                    }
+                                }
+                            ) {
+                                Text(
+                                    text = it.content,
+                                    textAlign = TextAlign.End,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(MaterialTheme.colorScheme.background)
+                                        .padding(16.dp),
+                                )
+                            }
                         }
                     }
                 }
