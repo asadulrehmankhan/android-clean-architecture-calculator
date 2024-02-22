@@ -1,12 +1,15 @@
 package io.github.aloussase.calculator.ui
 
 import android.content.res.Configuration
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -18,15 +21,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.aloussase.calculator.R
 import io.github.aloussase.calculator.repository.NullCalculatorRepository
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnClear
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnClearError
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnComputeResult
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnInput
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnOperation
+import io.github.aloussase.calculator.ui.CalculatorEvent.OnBackSpace
 import io.github.aloussase.calculator.ui.theme.CalculatorTheme
 
 @Preview(
@@ -82,7 +89,8 @@ fun CalculatorScreen(
                 onNumberPressed = { viewModel.onEvent(OnInput(it)) },
                 onOperationPressed = { viewModel.onEvent(OnOperation(it)) },
                 onEqualsPressed = { viewModel.onEvent(OnComputeResult) },
-                onClearPressed = { viewModel.onEvent(OnClear) }
+                onClearPressed = { viewModel.onEvent(OnClear) },
+                onBackSpacePressed = { viewModel.onEvent(OnBackSpace) }
             )
         }
     }
@@ -115,6 +123,7 @@ private fun Buttons(
     onOperationPressed: (String) -> Unit,
     onEqualsPressed: () -> Unit,
     onClearPressed: () -> Unit,
+    onBackSpacePressed: () -> Unit = {}
 ) {
     Column(
         modifier = modifier.fillMaxWidth()
@@ -161,6 +170,13 @@ private fun Buttons(
             modifier = Modifier.fillMaxWidth()
         ) {
             NumberButton("0", onNumberPressed, Modifier.weight(2f))
+            Image(
+                painter = painterResource(id = R.drawable.back),
+                contentDescription = "Backspace",
+                modifier = Modifier.clickable { onBackSpacePressed() }
+                    .weight(1f)
+                    .padding(18.dp, 5.dp, 18.dp, 10.dp)
+            )
             OperationButton(".", onOperationPressed, Modifier.weight(1f))
             RectangularButton(
                 text = "=",

@@ -12,6 +12,7 @@ import io.github.aloussase.calculator.ui.CalculatorEvent.OnDeleteHistoryItem
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnHistoryClear
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnHistoryItemClicked
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnInput
+import io.github.aloussase.calculator.ui.CalculatorEvent.OnBackSpace
 import io.github.aloussase.calculator.ui.CalculatorEvent.OnOperation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,8 +41,10 @@ class CalculatorViewModel @Inject constructor(
     }
 
     fun onEvent(evt: CalculatorEvent) {
+        println("Event: $evt")
         when (evt) {
             is OnInput -> {
+
                 _state.update {
                     it.copy(
                         input = it.input + evt.input
@@ -51,26 +54,54 @@ class CalculatorViewModel @Inject constructor(
 
             is OnOperation -> {
                 _state.update {
-                    it.copy(
-                        input = it.input + evt.operation
-                    )
+                    val currentInput = it.input
+                    val lastChar = currentInput.lastOrNull()
+                    val result = _state.value.result
+//                    if(currentInput.contains('.')){
+//                        it.copy(
+//                            input = currentInput + evt.operation
+//                        )
+//                    } else
+                    if (result != 0f) {
+                        it.copy(
+                            input = result.toString() + evt.operation,
+                        )
+                    } else {
+                        val isLastCharOperator = lastChar in listOf('+', '-', '*', '/')
+                        val newInput =
+                            if (!isLastCharOperator) currentInput + evt.operation else currentInput
+                        it.copy(input = newInput)
+                    }
+
+
                 }
             }
 
             is OnComputeResult -> {
                 viewModelScope.launch {
-                    val result = repository.calculate(_state.value.input)
-                    val item = HistoryItem(content = _state.value.input)
-                    val id = repository.createHistoryItem(item)
-                    _state.update {
-                        if (result == null) {
+                    val currentInput = _state.value.input
+                    val lastChar = currentInput.lastOrNull()
+                    val isLastCharOperator = lastChar in listOf('+', '-', '*', '/')
+                    if (!isLastCharOperator) {
+                        val result = repository.calculate(_state.value.input)
+                        val item = HistoryItem(content = _state.value.input)
+                        val id = repository.createHistoryItem(item)
+                        _state.update {
+                            if (result == null) {
+                                it.copy(
+                                    hadError = true
+                                )
+                            } else {
+                                it.copy(
+                                    result = result,
+                                    history = it.history + item.copy(id = id)
+                                )
+                            }
+                        }
+                    } else {
+                        _state.update {
                             it.copy(
                                 hadError = true
-                            )
-                        } else {
-                            it.copy(
-                                result = result,
-                                history = it.history + item.copy(id = id)
                             )
                         }
                     }
@@ -124,6 +155,21 @@ class CalculatorViewModel @Inject constructor(
                     it.copy(
                         hadError = false
                     )
+                }
+            }
+
+            is OnBackSpace -> {
+                println("Backspace pressed!")
+                _state.update {
+                    val newInput = it.input
+                    if (newInput.isNotEmpty())
+                        it.copy(
+                            input = it.input.dropLast(1)
+                        )
+                    else it.copy(
+                        input = it.input
+                    )
+
                 }
             }
         }

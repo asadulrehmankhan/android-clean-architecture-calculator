@@ -10,13 +10,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun RectangularButton(
+    modifier: Modifier = Modifier,
     text: String,
     textColor: Color = MaterialTheme.colorScheme.onBackground,
     backgroundColor: Color = MaterialTheme.colorScheme.background,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
     Button(
